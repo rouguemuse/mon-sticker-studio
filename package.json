@@ -1,0 +1,22 @@
+{
+  "name": "mon-sticker-studio",
+  "version": "1.0.0",
+  "description": "Telegram Sticker Pack Creation Studio",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "telegram",
+    "sticker",
+    "studio",
+    "creature",
+    "canvas",
+    "webp"
+  ],
+  "author": "",
+  "license": "MIT"
+}

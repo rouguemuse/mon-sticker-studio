@@ -1,0 +1,74 @@
+{
+  "stat_pool": [
+    "HP",
+    "CHAOS",
+    "INTELLIGENCE",
+    "LUCK",
+    "PATIENCE",
+    "BAD DECISIONS",
+    "SOCIAL BATTERY",
+    "CAFFEINE",
+    "SPITE",
+    "COMMON SENSE",
+    "QUESTIONABLE JUDGMENT",
+    "IMPULSE CONTROL",
+    "PROCRASTINATION",
+    "DRAMA ACCELERATION",
+    "SNACK RADAR",
+    "WI-FI RELIANCE"
+  ],
+  "value_types": [
+    "percentage",
+    "scale10",
+    "stars",
+    "status_words",
+    "special"
+  ],
+  "status_words": [
+    "HIGH",
+    "LOW",
+    "CRITICAL",
+    "NONE",
+    "CONCERNING",
+    "ABSOLUTELY NOT",
+    "UNMEASURABLE",
+    "VOLATILE"
+  ],
+  "special_values": [
+    "ERROR",
+    "404",
+    "∞",
+    "N/A",
+    "-12"
+  ],
+  "classes": [
+    "Parking Lot Necromancer",
+    "Unlicensed Parking Lot Oracle",
+    "Spreadsheet Warlock",
+    "Couch Bard",
+    "Midnight Snack Paladin",
+    "Wi-Fi Druid",
+    "Overthinking Berserker",
+    "Certified Tab Collector",
+    "Group Chat Instigator",
+    "Emergency Nap Specialist",
+    "Passive-Aggressive Cleric",
+    "Reckless Optimist Rogue"
+  ],
+  "special_abilities": [
+    "Turns a five-minute errand into an unexpected trilogy",
+    "Leaves anyone on read for 3 days then replies 'omg so sorry'",
+    "Orders food then immediately eats off your plate",
+    "Detects discounted iced coffee from 2 miles away",
+    "Summons chaos by typing 'so funny story...'",
+    "Cancels plans and feels pure unadulterated euphoria",
+    "Finds obscure internet drama within 9 seconds"
+  ],
+  "passive_effects": [
+    "Other people somehow become responsible",
+    "All nearby battery levels drop 15% faster",
+    "Guaranteed to find car keys in the last possible pocket",
+    "Immune to sleep schedules",
+    "Radiates mild existential dread during minor inconveniences"
+  ]
+}

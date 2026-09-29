@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480">
+  <defs>
+    <radialGradient id="faceGrad" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#fedac2"/>
+      <stop offset="100%" stop-color="#e8af90"/>
+    </radialGradient>
+    <linearGradient id="hairGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4a3328"/>
+      <stop offset="100%" stop-color="#241712"/>
+    </linearGradient>
+    <linearGradient id="jacketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a3f5a"/>
+      <stop offset="100%" stop-color="#141f2e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Torso & Denim Jacket -->
+  <path d="M 80 480 C 80 340 130 300 200 300 C 270 300 320 340 320 480 Z" fill="url(#jacketGrad)"/>
+  <!-- T-shirt collar -->
+  <path d="M 160 300 Q 200 340 240 300 Z" fill="#ffffff"/>
+
+  <!-- Neck -->
+  <rect x="175" y="240" width="50" height="70" rx="10" fill="#e8af90"/>
+
+  <!-- Long Hair Behind -->
+  <path d="M 110 160 C 100 280 120 380 130 400 C 170 360 230 360 270 400 C 280 380 300 280 290 160 Z" fill="url(#hairGrad)"/>
+
+  <!-- Face -->
+  <ellipse cx="200" cy="200" rx="70" ry="85" fill="url(#faceGrad)"/>
+
+  <!-- Hair Front -->
+  <path d="M 125 180 C 130 90 270 90 275 180 C 260 130 220 120 200 130 C 180 120 140 130 125 180 Z" fill="url(#hairGrad)"/>
+
+  <!-- Eyes with side-eye / expressive look -->
+  <ellipse cx="170" cy="195" rx="9" ry="6" fill="#ffffff"/>
+  <circle cx="172" cy="195" r="4" fill="#322218"/>
+  <ellipse cx="230" cy="195" rx="9" ry="6" fill="#ffffff"/>
+  <circle cx="232" cy="195" r="4" fill="#322218"/>
+
+  <!-- Eyebrows (slightly raised arch) -->
+  <path d="M 158 182 Q 170 176 182 182" stroke="#241712" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M 218 182 Q 230 176 242 182" stroke="#241712" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+  <!-- Nose -->
+  <path d="M 197 200 L 194 216 L 204 218" stroke="#cca185" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+  <!-- Smirking Mouth -->
+  <path d="M 185 240 Q 200 248 218 240" stroke="#b35a5a" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>

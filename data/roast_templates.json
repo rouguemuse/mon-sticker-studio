@@ -1,0 +1,42 @@
+{
+  "intensities": {
+    "1": "Friendly",
+    "2": "Teasing",
+    "3": "Mean Best Friend",
+    "4": "Unhinged",
+    "5": "Group Chat Has No Mercy"
+  },
+  "templates_by_intensity": {
+    "1": [
+      "{name} possesses the energy of someone who adds items to an online cart just to feel something.",
+      "{name} is the type of {class_name} who sets 14 alarms five minutes apart and still rushes.",
+      "{name} will literally research a restaurant menu for three days and then order chicken tenders."
+    ],
+    "2": [
+      "{name} says 'I'm five minutes away' while currently looking for their other sock.",
+      "As a {class_name}, {name} specializes in answering texts in their head and wondering why nobody replied.",
+      "{name} has 47 unread notifications and the emotional maturity of a startled raccoon."
+    ],
+    "3": [
+      "{name} brings absolutely zero practical skills to the apocalypse, but will organize the snacks with terrifying intensity.",
+      "{name} is living proof that common sense is a luxury good currently experiencing severe supply chain shortages.",
+      "{name} is frequently observed saying 'I'm literally leaving right now' while still wearing one slipper."
+    ],
+    "4": [
+      "{name} operates on 4% battery, 96% spite, and a deeply unfounded conviction that everything will work out.",
+      "A walking ergonomic disaster who treats emotional damage like a casual conversation starter.",
+      "If overconfidence was currency, {name} would still somehow be in astronomical overdraft."
+    ],
+    "5": [
+      "The FBI agent assigned to {name}'s webcam hasn't reported back in months due to second-hand exhaustion.",
+      "{name}'s life is an ongoing trial run that should have been canceled after the pilot episode.",
+      "Even their {class_name} license was revoked for sheer operational incompetence and reckless vibe checks."
+    ]
+  },
+  "context_modifiers": {
+    "plants": "Owns a cemetery of indoor succulents yet considers themself a herbal deity.",
+    "late": "Time is merely a suggestion that {name} violently rejects on philosophical grounds.",
+    "food": "Will declare they aren't hungry right before consuming 60% of your fries with zero remorse.",
+    "shopping": "Has unopened packages at their door acting as emotional support cardboard."
+  }
+}

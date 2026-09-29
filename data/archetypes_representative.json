@@ -1,0 +1,141 @@
+[
+  {
+    "id": 1,
+    "slot": "001",
+    "name": "Symbiotic Flora-Fauna Juvenile",
+    "archetype_family": "Plant-Symbiote Starter",
+    "ecological_niche": "Understory herbivore with photosynthetic mutualism",
+    "source_inspiration": {
+      "concept": "Small juvenile creature with symbiotic floral vegetation",
+      "temperament": "Curious, low-slung, sturdy, docile"
+    },
+    "trait_pools": {
+      "body_morphology": [
+        "Six-legged tree amphibian with grasping toe-pads",
+        "Long-bodied low-slung mustelid with spade claws",
+        "Plump pangolin-scale marsupial",
+        "Armored tortoise-lizard with segmented shell plates",
+        "Short-legged chinchilla-badger hybrid"
+      ],
+      "signature_element": [
+        "Interlocking fern crown along upper spine",
+        "Bracket shelf mushrooms sprouting from lateral ribs",
+        "Pair of flowering succulent rosettes on shoulder blades",
+        "Dangling orchid tendrils and seed pods beneath throat",
+        "Lichen-covered turf mantle with glowing cup fungi"
+      ],
+      "palette_pool": [
+        { "name": "Ochre and Sage", "body": "#628b6a", "belly": "#d4d8a5", "accent": "#d67c42", "eye": "#3a2e1d" },
+        { "name": "Lavender and Moss", "body": "#5a7865", "belly": "#c8b6d6", "accent": "#9c609c", "eye": "#2c1c38" },
+        { "name": "Rust and Turquoise", "body": "#43848b", "belly": "#e3bc9a", "accent": "#b85331", "eye": "#202020" }
+      ]
+    },
+    "forbidden_similarity": [
+      "blue-green quadrupedal frog-reptile with spotted turquoise patches",
+      "single closed green garlic bulb centered on back",
+      "Bulbasaur facial geometry and ear nubs"
+    ]
+  },
+  {
+    "id": 4,
+    "slot": "004",
+    "name": "Combustion-Bearing Reptile Juvenile",
+    "archetype_family": "Fire-Bearer Starter",
+    "ecological_niche": "Volcanic crag prowler with internal thermal core",
+    "source_inspiration": {
+      "concept": "Bipedal fire salamander juvenile with ignited appendage",
+      "temperament": "Fierce, energetic, loyal, alert"
+    },
+    "trait_pools": {
+      "body_morphology": [
+        "Slender prehensile-tailed gecko with obsidian scales",
+        "Bipedal feathered dromaeosaur hatchling",
+        "Armored armadillo-pangolin with glowing venting fissures",
+        "Stocky crested monitor lizard"
+      ],
+      "signature_element": [
+        "Bioluminescent magnesium embers puffing from spine quill tips",
+        "Cracked volcanic mantle glowing cherry red at core",
+        "Ignited tail tip with spiraling blue-orange flame plume",
+        "Flaring thermal dorsal fins that glow during breathing"
+      ],
+      "palette_pool": [
+        { "name": "Ember Tangerine and Charcoal", "body": "#e06c38", "belly": "#f4d084", "accent": "#332d2b", "eye": "#265b75" },
+        { "name": "Ash Slate and Cyan Flame", "body": "#4a535e", "belly": "#8392a5", "accent": "#3bc3d6", "eye": "#d4752c" }
+      ]
+    },
+    "forbidden_similarity": [
+      "smooth orange bipedal lizard with simple flame tail tip",
+      "Charmander eye shape and round skull",
+      "yellow underbelly patch on plain orange lizard"
+    ]
+  },
+  {
+    "id": 7,
+    "slot": "007",
+    "name": "Hydrodynamic Shell-Dweller Juvenile",
+    "archetype_family": "Aqua-Carapace Starter",
+    "ecological_niche": "Freshwater riverbed swimmer with pressurized hydro-propulsion",
+    "source_inspiration": {
+      "concept": "Bipedal water turtle juvenile with curling paddle tail",
+      "temperament": "Cheeky, resilient, playful"
+    },
+    "trait_pools": {
+      "body_morphology": [
+        "Web-footed otter-terrapin hybrid with streamlined carinate shell",
+        "Six-finned pliosaur hatchling",
+        "Bipedal axolotl with external gill frills and hydro-pouch",
+        "Pebble-shelled snapping tortoise with rudder tail"
+      ],
+      "signature_element": [
+        "Concentric vortex siphon vents integrated into rear plastron",
+        "Curled wave-crested plume tail made of hydrodynamic dense fibers",
+        "Spiral nautilus shell with water jet nozzles",
+        "Iridescent mother-of-pearl scutes that flash bioluminescence"
+      ],
+      "palette_pool": [
+        { "name": "Aquamarine and Amber Plastron", "body": "#5ba9cf", "belly": "#eccb7c", "accent": "#8a4836", "eye": "#7a2b38" },
+        { "name": "Deep Marine and Coral", "body": "#2d5e75", "belly": "#a3d3d9", "accent": "#e3655b", "eye": "#183240" }
+      ]
+    },
+    "forbidden_similarity": [
+      "light blue bipedal turtle with curly brown squirrel tail",
+      "Squirtle round head and shell proportions",
+      "two-tone brown and yellow turtle carapace"
+    ]
+  },
+  {
+    "id": 25,
+    "slot": "025",
+    "name": "Bio-Electric Lagomorph / Rodent",
+    "archetype_family": "Electric Rodent",
+    "ecological_niche": "Open savanna burrower with static discharge cheeks",
+    "source_inspiration": {
+      "concept": "Chubby electric rodent with spark-storing facial sacs",
+      "temperament": "Curious, zippy, expressive, feisty"
+    },
+    "trait_pools": {
+      "body_morphology": [
+        "Long-eared jerboa with oversized jumping hindpaws",
+        "Chubby pocket pika with dense velvet fur",
+        "Tree shrew with electrostatic quills",
+        "Plump banded tenrec with copper whiskers"
+      ],
+      "signature_element": [
+        "Forked lightning antenna ears with glowing dielectric tips",
+        "Ribbon-like iridescent copper tail that conducts arcs of electricity",
+        "Prismatic quartz nodes embedded along spine",
+        "Electro-receptive cheek wattles pulsating with amber sparks"
+      ],
+      "palette_pool": [
+        { "name": "Warm Ochre and Carmine", "body": "#e8b835", "belly": "#fff4d1", "accent": "#c93c3c", "eye": "#1c1815" },
+        { "name": "Copper Cream and Ultramarine", "body": "#c4884f", "belly": "#faebd7", "accent": "#3f67ba", "eye": "#202020" }
+      ]
+    },
+    "forbidden_similarity": [
+      "bright yellow chubby mouse with zigzag lightning bolt tail",
+      "circular red cheek dots on yellow face",
+      "brown stripes on back of yellow rodent"
+    ]
+  }
+]
