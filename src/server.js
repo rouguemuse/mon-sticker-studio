@@ -13,10 +13,14 @@ import { providerRegistry } from './providers/providerRegistry.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PUBLIC_DIR = path.resolve(__dirname, '../public');
-const PROJECTS_DIR = path.resolve(__dirname, '../projects');
+const PROJECTS_DIR = process.env.VERCEL ? '/tmp/projects' : path.resolve(__dirname, '../projects');
 
-if (!fs.existsSync(PROJECTS_DIR)) {
-  fs.mkdirSync(PROJECTS_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(PROJECTS_DIR)) {
+    fs.mkdirSync(PROJECTS_DIR, { recursive: true });
+  }
+} catch (e) {
+  // Read-only filesystem fallback
 }
 
 const MIME_TYPES = {
