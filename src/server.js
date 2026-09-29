@@ -208,9 +208,12 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Telegram Sticker Pack Creation Studio listening on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, () => {
+    console.log(`Telegram Sticker Pack Creation Studio listening on http://localhost:${PORT}`);
+  });
+}
 
+export default server;
 export { server };
