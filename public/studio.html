@@ -77,45 +77,102 @@
 
       <!-- TAB 1: CREATE / ADD -->
       <div class="tab-content active" id="tabCreate">
+        <!-- 1. Human Subject -->
         <div class="control-group">
-          <div class="control-label">1. Human Photo</div>
-          <div style="border: 2px dashed var(--border-color); border-radius:8px; padding:16px; text-align:center; cursor:pointer;" id="photoDropZone">
+          <div class="control-label">1. Human Subject</div>
+          <div style="border: 2px dashed var(--border-color); border-radius:8px; padding:12px; text-align:center; cursor:pointer;" id="photoDropZone">
             <input type="file" id="photoFileInput" accept="image/*" style="display:none;">
-            <p style="font-size:12px; margin-bottom:6px;">📸 Drop photo here or click to upload</p>
+            <p style="font-size:12px; margin-bottom:4px;">📸 Drop human photo or click to upload</p>
             <p style="font-size:10px; color:var(--text-muted);">Non-destructive • Subject cutout auto-applied</p>
           </div>
-          <div style="margin-top:8px; display:flex; gap:6px;">
+          <div style="margin-top:6px; display:flex; gap:6px;">
             <button id="btnSamplePortrait1" style="flex:1; font-size:11px;">Sample Photo 1</button>
             <button id="btnSamplePortrait2" style="flex:1; font-size:11px;">Sample Photo 2</button>
           </div>
         </div>
 
-        <div class="control-group">
-          <div class="control-label">2. Original Creature Generator</div>
-          <div style="display:flex; gap:6px; margin-bottom:8px;">
-            <select id="creatureArchetypeSelect" style="flex:1;">
-              <!-- Populated dynamically -->
-            </select>
-            <button id="btnGenerateCreature" class="accent" style="white-space:nowrap;">✨ Generate</button>
+        <!-- 2. Character / Creature Source System -->
+        <div class="control-group" style="border-top:1px solid var(--border-color); padding-top:10px;">
+          <div class="control-label">2. Character / Companion Source</div>
+          <div class="tabs-nav" style="margin-bottom:10px; border-radius:6px; overflow:hidden;">
+            <button class="tab-btn active" id="btnSourceUpload" style="font-size:10px; padding:6px;">Upload Character</button>
+            <button class="tab-btn" id="btnSourceGenerate" style="font-size:10px; padding:6px;">Generate Original</button>
+            <button class="tab-btn" id="btnSourceSaved" style="font-size:10px; padding:6px;">Saved Vault</button>
           </div>
-          <button id="btnBreakSimilarity" style="width:100%; font-size:11px; margin-bottom:6px;">🎲 Break Similarity (Re-Roll Novel Traits)</button>
-          <div id="similarityIndicator" style="font-size:11px; color:var(--success); padding:4px 8px; background:rgba(54,199,130,0.1); border-radius:4px; text-align:center;">
-            ✓ Safe Original Design (Zero Trademark Overlap)
+
+          <!-- SOURCE A: UPLOAD CHARACTER -->
+          <div id="sourcePanelUpload">
+            <div style="border: 2px dashed var(--border-color); border-radius:8px; padding:12px; text-align:center; cursor:pointer;" id="charDropZone">
+              <input type="file" id="charFileInput" accept="image/*" style="display:none;">
+              <p style="font-size:12px; margin-bottom:4px;">🎨 Drop character/creature image here</p>
+              <p style="font-size:10px; color:var(--text-muted);">Auto-cutout • Non-destructive</p>
+            </div>
+
+            <!-- Rights Confirmation -->
+            <div style="margin-top:8px; padding:8px; background:rgba(46,165,255,0.08); border-radius:6px; font-size:11px;">
+              <label style="display:flex; align-items:flex-start; gap:6px; cursor:pointer;">
+                <input type="checkbox" id="chkRightsConfirmation" checked style="margin-top:2px;">
+                <span>I own this image or have permission to use it for my intended purpose.</span>
+              </label>
+              <p style="font-size:9px; color:var(--text-muted); margin-top:4px;">Notice: This application provides editing tools and does not claim to grant or transfer copyright/IP rights to uploaded material.</p>
+            </div>
+
+            <!-- Style options for uploaded character -->
+            <div style="margin-top:8px;">
+              <span style="font-size:10px; color:var(--text-muted);">CHARACTER STYLING</span>
+              <div class="grid-2" style="margin-top:4px;">
+                <button class="btn-char-style active" data-style="as_is" style="font-size:10px; padding:5px;">Use As-Is</button>
+                <button class="btn-char-style" data-style="light_stylize" style="font-size:10px; padding:5px;">Lightly Stylize</button>
+                <button class="btn-char-style" data-style="match_human" style="font-size:10px; padding:5px;">Match Human Style</button>
+                <button class="btn-char-style" data-style="composite" style="font-size:10px; padding:5px;">Create Composite</button>
+              </div>
+            </div>
+
+            <button id="btnSaveUploadedToVault" style="width:100%; font-size:11px; margin-top:8px;">💾 Save Character to Vault</button>
+          </div>
+
+          <!-- SOURCE B: GENERATE ORIGINAL CREATURE -->
+          <div id="sourcePanelGenerate" style="display:none;">
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Generate an original creature with guaranteed non-infringing morphology.</p>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;">
+              <button id="btnGenerateCreature" class="accent" style="width:100%;">✨ Generate Original Creature</button>
+              <div class="input-row">
+                <button id="btnRandomizeCreature" style="flex:1; font-size:11px;">🎲 Randomize Traits</button>
+                <button id="btnBreakSimilarity" style="flex:1; font-size:11px;">🛡️ Make More Original</button>
+              </div>
+            </div>
+            <div id="similarityIndicator" style="font-size:11px; color:var(--success); padding:4px 8px; background:rgba(54,199,130,0.1); border-radius:4px; text-align:center;">
+              ✓ Safe Original Design (Zero Trademark Overlap)
+            </div>
+            <button id="btnSaveGeneratedToVault" style="width:100%; font-size:11px; margin-top:8px;">💾 Save Generated to Vault</button>
+          </div>
+
+          <!-- SOURCE C: SAVED CHARACTERS VAULT -->
+          <div id="sourcePanelSaved" style="display:none;">
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Click any saved character to place it on the canvas:</p>
+            <div id="vaultList" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; max-height:160px; overflow-y:auto;">
+              <!-- Populated dynamically -->
+            </div>
           </div>
         </div>
 
-        <div class="control-group">
-          <div class="control-label">3. Human + Creature Duo Presets</div>
-          <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">Auto-align person and creature into standard sticker poses:</p>
+        <!-- 3. Human + Character Duo & Composition -->
+        <div class="control-group" style="border-top:1px solid var(--border-color); padding-top:10px;">
+          <div class="control-label">
+            <span>3. Human + Character Composition</span>
+            <button id="btnBlendStyles" class="accent" style="padding:2px 6px; font-size:10px;" title="Harmonize lighting & color between photo and art">✨ Blend Styles</button>
+          </div>
           <div class="grid-2">
             <div class="preset-chip" data-preset="shoulder">🦜 On Shoulder</div>
             <div class="preset-chip" data-preset="in_arms">🤗 In Arms</div>
             <div class="preset-chip" data-preset="head">👑 On Head</div>
-            <div class="preset-chip" data-preset="behind">👀 Peeking Behind</div>
-            <div class="preset-chip" data-preset="hugging">🫂 Hugging Person</div>
-            <div class="preset-chip" data-preset="attacking">🦖 Playful Attack</div>
-            <div class="preset-chip" data-preset="judging">😒 Side-Eye Duo</div>
-            <div class="preset-chip" data-preset="riding">🏇 Riding Mount</div>
+            <div class="preset-chip" data-preset="hugging">🫂 Hugging</div>
+            <div class="preset-chip" data-preset="fighting">⚔️ Fighting</div>
+            <div class="preset-chip" data-preset="judging">😒 Judging</div>
+            <div class="preset-chip" data-preset="side_eye">👀 Side Eye</div>
+            <div class="preset-chip" data-preset="riding">🏇 Riding</div>
+            <div class="preset-chip" data-preset="photobomb">📸 Photobomb</div>
+            <div class="preset-chip" data-preset="tiny_version">🐜 Tiny Version</div>
           </div>
         </div>
       </div>
@@ -191,8 +248,14 @@
       <!-- TAB 3: MASK / CUTOUT BRUSH -->
       <div class="tab-content" id="tabMask">
         <div class="control-group">
-          <div class="control-label">Mask Editing</div>
-          <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Non-destructively paint on the human layer to erase or restore parts of the photo.</p>
+          <div class="control-label">Target Layer for Masking</div>
+          <div class="grid-2" style="margin-bottom:10px;">
+            <button id="btnMaskTargetHuman" class="active" style="border-color:var(--accent);">👤 Human Photo</button>
+            <button id="btnMaskTargetChar">🎨 Character Layer</button>
+          </div>
+
+          <div class="control-label">Mask Editing Tools</div>
+          <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Non-destructively paint to erase or restore parts of the selected layer.</p>
           <div class="grid-2" style="margin-bottom:12px;">
             <button id="btnBrushErase" class="active" style="border-color:var(--accent);">🧹 Erase Brush</button>
             <button id="btnBrushRestore">🖌 Restore Brush</button>
@@ -206,8 +269,8 @@
             <input type="range" id="brushHardness" min="10" max="100" value="80">
           </div>
           <div class="grid-2">
-            <button id="btnAutoCutout" class="accent">⚡ Re-Cutout</button>
-            <button id="btnResetMask">↺ Reset Full Photo</button>
+            <button id="btnAutoCutout" class="accent">⚡ Auto Cutout</button>
+            <button id="btnResetMask">↺ Reset Full Image</button>
           </div>
         </div>
       </div>

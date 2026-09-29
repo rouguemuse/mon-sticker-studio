@@ -1,11 +1,13 @@
 /**
  * app.js
  * Main studio controller orchestrating the canvas, layers, photo masking,
- * creature generator, stats & roast engines, and Telegram export.
+ * Character Source System (Upload, Generate, Saved Vault), Blend Styles,
+ * Stats & Roast engines, and Telegram export.
  */
 
 import { StickerCanvas } from './canvas.js';
 import { PhotoMaskProcessor } from './photoMask.js';
+import { CharacterManager } from './characterManager.js';
 import { renderStatsCardToCanvas } from './statsEditor.js';
 import { renderBubbleToCanvas } from './speechBubble.js';
 import { applyDuoPreset } from './compositionPresets.js';
@@ -14,14 +16,16 @@ import { PackManager } from './pack.js';
 class StudioApp {
   constructor() {
     this.canvas = new StickerCanvas('stickerCanvas', 'interactionCanvas');
-    this.maskProcessor = new PhotoMaskProcessor();
+    this.humanMaskProcessor = new PhotoMaskProcessor();
+    this.charManager = new CharacterManager(this);
     this.pack = new PackManager(() => this.renderPackTray());
 
     // Current State
     this.humanLayerId = null;
-    this.creatureLayerId = null;
+    this.characterLayerId = null;
     this.statsLayerId = null;
     this.bubbleLayerId = null;
+    this.activeMaskTarget = 'human'; // 'human' | 'char'
 
     this.currentStats = {
       name: 'Rachel',
@@ -38,22 +42,45 @@ class StudioApp {
     };
 
     this.initUI();
-    this.loadArchetypes();
     this.renderStatsEditorInputs();
+    this.renderVaultList();
     this.bindEvents();
     this.renderLayerList();
   }
 
   initUI() {
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // Top Tab switching
+    document.querySelectorAll('.tabs-nav .tab-btn[data-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tabs-nav .tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         btn.classList.add('active');
         const tab = document.getElementById(btn.dataset.tab);
         if (tab) tab.classList.add('active');
       });
+    });
+
+    // Character Source sub-tabs (Upload, Generate, Saved Vault)
+    const btnSourceUpload = document.getElementById('btnSourceUpload');
+    const btnSourceGenerate = document.getElementById('btnSourceGenerate');
+    const btnSourceSaved = document.getElementById('btnSourceSaved');
+
+    const panelUpload = document.getElementById('sourcePanelUpload');
+    const panelGenerate = document.getElementById('sourcePanelGenerate');
+    const panelSaved = document.getElementById('sourcePanelSaved');
+
+    const setSourceTab = (activeBtn, activePanel) => {
+      [btnSourceUpload, btnSourceGenerate, btnSourceSaved].forEach(b => b.classList.remove('active'));
+      [panelUpload, panelGenerate, panelSaved].forEach(p => p.style.display = 'none');
+      activeBtn.classList.add('active');
+      activePanel.style.display = 'block';
+    };
+
+    btnSourceUpload.addEventListener('click', () => setSourceTab(btnSourceUpload, panelUpload));
+    btnSourceGenerate.addEventListener('click', () => setSourceTab(btnSourceGenerate, panelGenerate));
+    btnSourceSaved.addEventListener('click', () => {
+      setSourceTab(btnSourceSaved, panelSaved);
+      this.renderVaultList();
     });
 
     // Background toggles
@@ -67,23 +94,6 @@ class StudioApp {
     document.getElementById('btnBgTgLight').addEventListener('click', () => {
       bg.className = 'canvas-bg-checker theme-tg-light';
     });
-  }
-
-  async loadArchetypes() {
-    try {
-      const res = await fetch('/api/archetypes');
-      const archetypes = await res.json();
-      const select = document.getElementById('creatureArchetypeSelect');
-      select.innerHTML = '';
-      archetypes.forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = a.id;
-        opt.textContent = `#${a.slot} ${a.name}`;
-        select.appendChild(opt);
-      });
-    } catch (e) {
-      console.error('Failed to load archetypes:', e);
-    }
   }
 
   bindEvents() {
@@ -116,14 +126,14 @@ class StudioApp {
         this.canvas.layers = [];
         this.canvas.activeLayerId = null;
         this.humanLayerId = null;
-        this.creatureLayerId = null;
+        this.characterLayerId = null;
         this.canvas.render();
         this.canvas.renderHandles();
         this.renderLayerList();
       }
     });
 
-    // Layer management actions
+    // Layer stack controls
     document.getElementById('btnMoveLayerUp').addEventListener('click', () => {
       if (this.canvas.activeLayerId) {
         this.canvas.moveLayerOrder(this.canvas.activeLayerId, 1);
@@ -193,32 +203,32 @@ class StudioApp {
     });
     document.getElementById('propStylizeStrength').addEventListener('input', e => {
       const active = this.canvas.getActiveLayer();
-      if (active && active.type === 'human') {
+      if (active && (active.type === 'human' || active.type === 'creature')) {
         active.stylize = parseInt(e.target.value, 10);
         this.canvas.render();
       }
     });
 
-    // Photo Upload & Samples
-    const dropZone = document.getElementById('photoDropZone');
-    const fileInput = document.getElementById('photoFileInput');
+    // Human Photo Upload & Samples
+    const photoDropZone = document.getElementById('photoDropZone');
+    const photoFileInput = document.getElementById('photoFileInput');
 
-    dropZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => {
+    photoDropZone.addEventListener('click', () => photoFileInput.click());
+    photoFileInput.addEventListener('change', e => {
       if (e.target.files && e.target.files[0]) {
         this.handlePhotoFile(e.target.files[0]);
       }
     });
-    dropZone.addEventListener('dragover', e => {
+    photoDropZone.addEventListener('dragover', e => {
       e.preventDefault();
-      dropZone.style.borderColor = 'var(--accent)';
+      photoDropZone.style.borderColor = 'var(--accent)';
     });
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.style.borderColor = 'var(--border-color)';
+    photoDropZone.addEventListener('dragleave', () => {
+      photoDropZone.style.borderColor = 'var(--border-color)';
     });
-    dropZone.addEventListener('drop', e => {
+    photoDropZone.addEventListener('drop', e => {
       e.preventDefault();
-      dropZone.style.borderColor = 'var(--border-color)';
+      photoDropZone.style.borderColor = 'var(--border-color)';
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
         this.handlePhotoFile(e.dataTransfer.files[0]);
       }
@@ -231,40 +241,152 @@ class StudioApp {
       this.loadHumanPhoto('assets/sample_portrait_2.svg');
     });
 
-    // Mask editing
+    // Character Upload
+    const charDropZone = document.getElementById('charDropZone');
+    const charFileInput = document.getElementById('charFileInput');
+
+    charDropZone.addEventListener('click', () => charFileInput.click());
+    charFileInput.addEventListener('change', e => {
+      if (e.target.files && e.target.files[0]) {
+        this.handleCharacterFile(e.target.files[0]);
+      }
+    });
+    charDropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      charDropZone.style.borderColor = 'var(--accent)';
+    });
+    charDropZone.addEventListener('dragleave', () => {
+      charDropZone.style.borderColor = 'var(--border-color)';
+    });
+    charDropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      charDropZone.style.borderColor = 'var(--border-color)';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        this.handleCharacterFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // Character styling modes (as-is, light-stylize, match-human, composite)
+    document.querySelectorAll('.btn-char-style').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-char-style').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.style;
+        this.applyCharacterStyleMode(mode);
+      });
+    });
+
+    // Character Vault Save
+    document.getElementById('btnSaveUploadedToVault').addEventListener('click', () => {
+      const name = prompt('Name for this saved character:', 'My Character');
+      if (name) {
+        this.charManager.saveCurrentCharacterToVault(name);
+        this.renderVaultList();
+        alert(`Saved "${name}" to your character vault!`);
+      }
+    });
+    document.getElementById('btnSaveGeneratedToVault').addEventListener('click', () => {
+      const name = prompt('Name for this saved creature:', 'Original Creature');
+      if (name) {
+        this.charManager.saveCurrentCharacterToVault(name);
+        this.renderVaultList();
+        alert(`Saved "${name}" to your character vault!`);
+      }
+    });
+
+    // Original Creature Generator buttons
+    document.getElementById('btnGenerateCreature').addEventListener('click', () => this.generateCreature());
+    document.getElementById('btnRandomizeCreature').addEventListener('click', () => this.generateCreature({ randomize: true }));
+    document.getElementById('btnBreakSimilarity').addEventListener('click', () => this.generateCreature({ breakSimilarity: true }));
+
+    // Duo Presets
+    document.querySelectorAll('.preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const preset = chip.dataset.preset;
+        const human = this.canvas.layers.find(l => l.id === this.humanLayerId);
+        const charLayer = this.canvas.layers.find(l => l.id === this.characterLayerId);
+        if (!human || !charLayer) {
+          alert('Add both a Human Subject and a Character first to use Duo Presets!');
+          return;
+        }
+        applyDuoPreset(preset, human, charLayer);
+        this.canvas.saveSnapshot();
+        this.canvas.render();
+        this.canvas.renderHandles();
+      });
+    });
+
+    // Blend Styles button
+    document.getElementById('btnBlendStyles').addEventListener('click', () => {
+      const human = this.canvas.layers.find(l => l.id === this.humanLayerId);
+      const charLayer = this.canvas.layers.find(l => l.id === this.characterLayerId);
+      if (!human || !charLayer) {
+        alert('Add both a Human Subject and a Character first to blend styles!');
+        return;
+      }
+      this.charManager.blendStyles(human, charLayer);
+      this.canvas.saveSnapshot();
+      this.canvas.render();
+      alert('✨ Styles harmonized! Color grades and ambient tones unified between human and character.');
+    });
+
+    // Mask Target Switcher (Human vs Character)
+    const btnMaskHuman = document.getElementById('btnMaskTargetHuman');
+    const btnMaskChar = document.getElementById('btnMaskTargetChar');
+    btnMaskHuman.addEventListener('click', () => {
+      this.activeMaskTarget = 'human';
+      btnMaskHuman.classList.add('active');
+      btnMaskHuman.style.borderColor = 'var(--accent)';
+      btnMaskChar.classList.remove('active');
+      btnMaskChar.style.borderColor = 'transparent';
+    });
+    btnMaskChar.addEventListener('click', () => {
+      this.activeMaskTarget = 'char';
+      btnMaskChar.classList.add('active');
+      btnMaskChar.style.borderColor = 'var(--accent)';
+      btnMaskHuman.classList.remove('active');
+      btnMaskHuman.style.borderColor = 'transparent';
+    });
+
+    // Mask editing brush controls
     document.getElementById('btnBrushErase').addEventListener('click', e => {
-      this.maskProcessor.brushMode = 'erase';
+      this.getCurrentMaskProcessor().brushMode = 'erase';
       e.target.style.borderColor = 'var(--accent)';
       document.getElementById('btnBrushRestore').style.borderColor = 'transparent';
     });
     document.getElementById('btnBrushRestore').addEventListener('click', e => {
-      this.maskProcessor.brushMode = 'restore';
+      this.getCurrentMaskProcessor().brushMode = 'restore';
       e.target.style.borderColor = 'var(--accent)';
       document.getElementById('btnBrushErase').style.borderColor = 'transparent';
     });
     document.getElementById('brushSize').addEventListener('input', e => {
-      this.maskProcessor.brushSize = parseInt(e.target.value, 10);
+      this.humanMaskProcessor.brushSize = parseInt(e.target.value, 10);
+      this.charManager.maskProcessor.brushSize = parseInt(e.target.value, 10);
       document.getElementById('brushSizeVal').textContent = `${e.target.value}px`;
     });
     document.getElementById('brushHardness').addEventListener('input', e => {
-      this.maskProcessor.brushHardness = parseInt(e.target.value, 10) / 100;
+      const h = parseInt(e.target.value, 10) / 100;
+      this.humanMaskProcessor.brushHardness = h;
+      this.charManager.maskProcessor.brushHardness = h;
       document.getElementById('brushHardnessVal').textContent = `${e.target.value}%`;
     });
     document.getElementById('btnAutoCutout').addEventListener('click', () => {
-      this.maskProcessor.applyAutoCutout();
-      this.updateHumanLayerComposite();
+      const proc = this.getCurrentMaskProcessor();
+      proc.applyAutoCutout();
+      this.updateActiveLayerComposite();
     });
     document.getElementById('btnResetMask').addEventListener('click', () => {
-      this.maskProcessor.resetMask();
-      this.updateHumanLayerComposite();
+      const proc = this.getCurrentMaskProcessor();
+      proc.resetMask();
+      this.updateActiveLayerComposite();
     });
 
-    // Mask painting on canvas when Mask tab is active
+    // Mask painting on canvas
     let isPaintingMask = false;
     const iCanvas = this.canvas.interactionCanvas;
     iCanvas.addEventListener('mousedown', e => {
       const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-      if (activeTab === 'tabMask' && this.humanLayerId) {
+      if (activeTab === 'tabMask') {
         isPaintingMask = true;
         this.paintMaskAtEvent(e);
       }
@@ -279,27 +401,6 @@ class StudioApp {
         isPaintingMask = false;
         this.canvas.saveSnapshot();
       }
-    });
-
-    // Creature Generation
-    document.getElementById('btnGenerateCreature').addEventListener('click', () => this.generateCreature());
-    document.getElementById('btnBreakSimilarity').addEventListener('click', () => this.generateCreature({ breakSimilarity: true }));
-
-    // Duo Presets
-    document.querySelectorAll('.preset-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const preset = chip.dataset.preset;
-        const human = this.canvas.layers.find(l => l.id === this.humanLayerId);
-        const creature = this.canvas.layers.find(l => l.id === this.creatureLayerId);
-        if (!human || !creature) {
-          alert('Add both a Human Photo and a Creature first to use Duo Presets!');
-          return;
-        }
-        applyDuoPreset(preset, human, creature);
-        this.canvas.saveSnapshot();
-        this.canvas.render();
-        this.canvas.renderHandles();
-      });
     });
 
     // Stats & Roast
@@ -349,9 +450,18 @@ class StudioApp {
     document.getElementById('btnCreatePackFromChar').addEventListener('click', () => this.createFullReactionPack());
   }
 
+  getCurrentMaskProcessor() {
+    return this.activeMaskTarget === 'human' ? this.humanMaskProcessor : this.charManager.maskProcessor;
+  }
+
   paintMaskAtEvent(e) {
-    const human = this.canvas.layers.find(l => l.id === this.humanLayerId);
-    if (!human || !this.maskProcessor.rawImage) return;
+    const isHuman = this.activeMaskTarget === 'human';
+    const layer = isHuman
+      ? this.canvas.layers.find(l => l.id === this.humanLayerId)
+      : this.canvas.layers.find(l => l.id === this.characterLayerId);
+
+    const proc = isHuman ? this.humanMaskProcessor : this.charManager.maskProcessor;
+    if (!layer || !proc.rawImage) return;
 
     const rect = this.canvas.interactionCanvas.getBoundingClientRect();
     const scaleX = 512 / rect.width;
@@ -359,24 +469,28 @@ class StudioApp {
     const canvasX = (e.clientX - rect.left) * scaleX;
     const canvasY = (e.clientY - rect.top) * scaleY;
 
-    // Convert from canvas coords into mask coords
-    const localX = (canvasX - (human.x - (human.width * human.scale) / 2)) / human.scale;
-    const localY = (canvasY - (human.y - (human.height * human.scale) / 2)) / human.scale;
+    const localX = (canvasX - (layer.x - (layer.width * layer.scale) / 2)) / layer.scale;
+    const localY = (canvasY - (layer.y - (layer.height * layer.scale) / 2)) / layer.scale;
 
-    const maskW = this.maskProcessor.maskCanvas.width;
-    const maskH = this.maskProcessor.maskCanvas.height;
+    const maskW = proc.maskCanvas.width;
+    const maskH = proc.maskCanvas.height;
 
-    const normX = (localX / human.width) * maskW;
-    const normY = (localY / human.height) * maskH;
+    const normX = (localX / layer.width) * maskW;
+    const normY = (localY / layer.height) * maskH;
 
-    this.maskProcessor.paintBrush(normX, normY);
-    this.updateHumanLayerComposite();
+    proc.paintBrush(normX, normY);
+    this.updateActiveLayerComposite();
   }
 
-  updateHumanLayerComposite() {
-    const human = this.canvas.layers.find(l => l.id === this.humanLayerId);
-    if (human) {
-      human.image = this.maskProcessor.getCompositedImage();
+  updateActiveLayerComposite() {
+    const isHuman = this.activeMaskTarget === 'human';
+    const layer = isHuman
+      ? this.canvas.layers.find(l => l.id === this.humanLayerId)
+      : this.canvas.layers.find(l => l.id === this.characterLayerId);
+
+    const proc = isHuman ? this.humanMaskProcessor : this.charManager.maskProcessor;
+    if (layer) {
+      layer.image = proc.getCompositedImage();
       this.canvas.render();
       this.canvas.renderHandles();
     }
@@ -391,14 +505,13 @@ class StudioApp {
   }
 
   async loadHumanPhoto(src) {
-    await this.maskProcessor.loadFromSource(src);
-    const composited = this.maskProcessor.getCompositedImage();
+    await this.humanMaskProcessor.loadFromSource(src);
+    const composited = this.humanMaskProcessor.getCompositedImage();
 
-    // Check if human layer exists, or add it
     let human = this.canvas.layers.find(l => l.id === this.humanLayerId);
     if (!human) {
       human = this.canvas.addLayer({
-        name: 'Human Photo',
+        name: 'Human Subject',
         type: 'human',
         image: composited,
         x: 256,
@@ -417,38 +530,130 @@ class StudioApp {
     this.updateInspectorFromActive();
   }
 
+  async handleCharacterFile(file) {
+    const rightsChecked = document.getElementById('chkRightsConfirmation').checked;
+    if (!rightsChecked) {
+      alert('Please confirm rights/permission before importing character images.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const charObj = await this.charManager.handleCharacterUpload(e.target.result, true);
+      this.placeCharacterOnCanvas(charObj.imageCanvas, 'Uploaded Character');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  placeCharacterOnCanvas(imageCanvas, name = 'Character') {
+    let charLayer = this.canvas.layers.find(l => l.id === this.characterLayerId);
+    if (!charLayer) {
+      charLayer = this.canvas.addLayer({
+        name,
+        type: 'creature',
+        image: imageCanvas,
+        x: 350,
+        y: 200,
+        width: 280,
+        height: 280,
+        scale: 0.55
+      });
+      this.characterLayerId = charLayer.id;
+    } else {
+      charLayer.image = imageCanvas;
+      charLayer.name = name;
+      this.canvas.render();
+    }
+    this.renderLayerList();
+    this.updateInspectorFromActive();
+  }
+
+  applyCharacterStyleMode(mode) {
+    const charLayer = this.canvas.layers.find(l => l.id === this.characterLayerId);
+    if (!charLayer) return;
+
+    if (mode === 'light_stylize') {
+      charLayer.stylize = 35;
+    } else if (mode === 'match_human') {
+      charLayer.stylize = 15;
+    } else if (mode === 'composite') {
+      const human = this.canvas.layers.find(l => l.id === this.humanLayerId);
+      this.charManager.blendStyles(human, charLayer);
+    } else {
+      charLayer.stylize = 0;
+    }
+    this.canvas.render();
+  }
+
+  renderVaultList() {
+    const container = document.getElementById('vaultList');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (this.charManager.savedVault.length === 0) {
+      container.innerHTML = '<p style="grid-column:1/3; font-size:11px; color:var(--text-muted); text-align:center;">No saved characters yet. Upload or generate one and click Save to Vault!</p>';
+      return;
+    }
+
+    this.charManager.savedVault.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'preset-chip';
+      card.style.display = 'flex';
+      card.style.flexDirection = 'column';
+      card.style.alignItems = 'center';
+      card.style.gap = '4px';
+      card.style.position = 'relative';
+
+      card.innerHTML = `
+        <img src="${item.dataUrl}" style="width:48px; height:48px; object-fit:contain; border-radius:4px;">
+        <span style="font-size:10px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">${item.name}</span>
+        <button class="btn-del-vault" style="position:absolute; top:2px; right:2px; padding:0 3px; font-size:9px; background:rgba(235,87,87,0.8); border:none; border-radius:50%; color:#fff;">✕</button>
+      `;
+
+      card.addEventListener('click', e => {
+        if (!e.target.classList.contains('btn-del-vault')) {
+          const img = new Image();
+          img.onload = () => {
+            this.charManager.currentCharacter = {
+              name: item.name,
+              sourceType: 'saved',
+              imageCanvas: img,
+              rawSource: item.dataUrl
+            };
+            this.placeCharacterOnCanvas(img, item.name);
+          };
+          img.src = item.dataUrl;
+        }
+      });
+
+      card.querySelector('.btn-del-vault').addEventListener('click', e => {
+        e.stopPropagation();
+        this.charManager.deleteFromVault(item.id);
+        this.renderVaultList();
+      });
+
+      container.appendChild(card);
+    });
+  }
+
   async generateCreature(options = {}) {
-    const archetypeId = document.getElementById('creatureArchetypeSelect').value || 1;
     try {
       const res = await fetch('/api/creature/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ archetypeId, ...options })
+        body: JSON.stringify(options)
       });
       const data = await res.json();
 
       const img = new Image();
       img.onload = () => {
-        let creature = this.canvas.layers.find(l => l.id === this.creatureLayerId);
-        if (!creature) {
-          creature = this.canvas.addLayer({
-            name: `Creature (${data.name})`,
-            type: 'creature',
-            image: img,
-            x: 350,
-            y: 200,
-            width: 280,
-            height: 280,
-            scale: 0.55
-          });
-          this.creatureLayerId = creature.id;
-        } else {
-          creature.image = img;
-          creature.name = `Creature (${data.name})`;
-          this.canvas.render();
-        }
-        this.renderLayerList();
-        this.updateInspectorFromActive();
+        this.charManager.currentCharacter = {
+          name: data.name,
+          sourceType: 'generated',
+          imageCanvas: img,
+          rawSource: data.dataUrl
+        };
+        this.placeCharacterOnCanvas(img, `Creature (${data.name})`);
       };
       img.src = data.dataUrl;
     } catch (e) {
@@ -620,7 +825,7 @@ class StudioApp {
       const item = document.createElement('div');
       item.className = `layer-item ${active && active.id === l.id ? 'active' : ''}`;
       item.innerHTML = `
-        <span class="layer-icon">${l.type === 'human' ? '👤' : l.type === 'creature' ? '🦖' : l.type === 'stats' ? '🎴' : '💬'}</span>
+        <span class="layer-icon">${l.type === 'human' ? '👤' : l.type === 'creature' ? '🎨' : l.type === 'stats' ? '🎴' : '💬'}</span>
         <span class="layer-name">${l.name}</span>
         <div class="layer-actions">
           <button class="layer-btn toggle-vis" title="Toggle Visibility">${l.visible ? '👁' : '🚫'}</button>
@@ -653,7 +858,7 @@ class StudioApp {
       item.querySelector('.delete-layer').addEventListener('click', () => {
         this.canvas.removeLayer(l.id);
         if (this.humanLayerId === l.id) this.humanLayerId = null;
-        if (this.creatureLayerId === l.id) this.creatureLayerId = null;
+        if (this.characterLayerId === l.id) this.characterLayerId = null;
         this.renderLayerList();
         this.updateInspectorFromActive();
       });
@@ -741,7 +946,6 @@ class StudioApp {
   }
 
   async applyReactionVariation(reaction) {
-    // If speech bubble exists, update it to reaction text
     const reactionTexts = {
       laughing: 'LMAOOOO 💀',
       rage: 'ABSOLUTELY NOT.',
@@ -765,8 +969,10 @@ class StudioApp {
       this.addOrUpdateSpeechBubble();
     }
 
-    // Re-generate creature with this emotion
-    await this.generateCreature({ emotion: reaction });
+    // If character layer exists and is generated, update its emotion
+    if (this.charManager.currentCharacter?.sourceType === 'generated') {
+      await this.generateCreature({ emotion: reaction });
+    }
 
     // Add to pack with the associated emoji
     await this.addCurrentStickerToPack({
